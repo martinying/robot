@@ -4,18 +4,25 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.robot.subsystem.SwerveDrive;
+import frc.robot.commands.SwerveJoystick;
+import frc.robot.constants.OIConstants;
 
 public class RobotContainer {
-  private SwerveDrive swerveDrive = new SwerveDrive();
+  private final Joystick driveJoystick = new Joystick(OIConstants.kDriveJoystickId);
 
   public RobotContainer() {
+    new SwerveJoystick(
+      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickXAxis), 
+      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickYxis), 
+      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickRotAxis));
     configureBindings();
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
