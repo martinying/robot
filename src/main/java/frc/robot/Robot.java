@@ -6,11 +6,9 @@ package frc.robot;
 
 import java.io.File;
 
-import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -33,23 +31,28 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
 
     if (isReal()) {
-      Logger.addDataReceiver(new WPILOGWriter(this.makeLogFileDirectoryIfNotExists("/homne/lvuser/logs"))); // Log to a USB stick ("/U/logs")
+      Logger.addDataReceiver(new WPILOGWriter(this.makeLogFileDirectoryIfNotExists("/homne/lvuser/logs"))); // Log to a
+                                                                                                            // USB stick
+                                                                                                            // ("/U/logs")
       Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       new PowerDistribution(1, ModuleType.kRev); // Enables power distribution
       // logging
     } else {
-      setUseTiming(false); // Run as fast as possible
-      String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
-      Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
-      Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+      Logger.addDataReceiver(new NT4Publisher());
+      // setUseTiming(false); // Run as fast as possible
+      // String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from
+      // AdvantageScope (or prompt the user)
+      // Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
+      // Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath,
+      // "_sim"))); // Save outputs to a new log
     }
 
     Logger.start();
   }
 
-  private String makeLogFileDirectoryIfNotExists(String pathName){
+  private String makeLogFileDirectoryIfNotExists(String pathName) {
     File directory = new File(pathName);
-    if(!directory.exists()) {
+    if (!directory.exists()) {
       directory.mkdir();
     }
     return pathName;
@@ -91,6 +94,7 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
+    // m_teleopCommand = m_robotContainer.getTeleopCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

@@ -7,18 +7,21 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystem.SwerveDrive;
 import frc.robot.commands.SwerveJoystick;
 import frc.robot.constants.OIConstants;
 
 public class RobotContainer {
   private final Joystick driveJoystick = new Joystick(OIConstants.kDriveJoystickId);
+  private SwerveDrive swerveDrive = new SwerveDrive();
 
   public RobotContainer() {
-    new SwerveJoystick(
-      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickXAxis), 
-      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickYxis), 
-      () -> -driveJoystick.getRawAxis(OIConstants.kJoystickRotAxis));
+    bindCommandsToSubsystems();
     configureBindings();
+  }
+
+  private void bindCommandsToSubsystems() {    
+    swerveDrive.setDefaultCommand(new SwerveJoystick(swerveDrive, driveJoystick));
   }
 
   private void configureBindings() {

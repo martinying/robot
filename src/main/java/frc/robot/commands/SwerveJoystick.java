@@ -8,48 +8,61 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.constants.DriveConstants;
 import frc.robot.constants.OIConstants;
+import frc.robot.subsystem.SwerveDrive;
 
 public class SwerveJoystick extends Command {
   /** Creates a new SwerveJoystick. */
 
-  private final Supplier<Double> xSpeed, ySpeed, turningSpeed;
+  private final Joystick joyStick;
   private final SlewRateLimiter turningSlewRateLimiter;
+  private final SlewRateLimiter xSlewRateLimiter;
+  private final SlewRateLimiter ySlewRateLimiter;
+  private final SwerveDrive swerveDrive;
 
-  public SwerveJoystick(Supplier<Double> xSpeed, Supplier<Double> ySpeed, Supplier<Double> turningSpeed) {
-    this.xSpeed = xSpeed;
-    this.ySpeed = ySpeed;
-    this.turningSpeed = turningSpeed;
-        
+  public SwerveJoystick(SwerveDrive swerveDrive, Joystick joyStick) {
     this.turningSlewRateLimiter = new SlewRateLimiter(DriveConstants.kMaxAngularAccelBotRotsPerSecondSquared);
+    this.xSlewRateLimiter = new SlewRateLimiter(DriveConstants.kMaxTranslationalMetersPerSecond);
+    this.ySlewRateLimiter = new SlewRateLimiter(DriveConstants.kMaxTranslationalMetersPerSecond);
+    this.joyStick = joyStick;
+    this.swerveDrive = swerveDrive;
     // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(swerveDrive);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {System.out.println("SwerveJoystick Initialized");}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xSpeed = this.xSpeed.get();
-    double ySpeed = this.ySpeed.get();
-    double turningSpeed = this.turningSpeed.get();
+    double xSpeed = joyStick.getRawAxis(0);
+    double ySpeed = joyStick.getRawAxis(1);
+    double turningSpeed = joyStick.getRawAxis(2);
+
+    SmartDashboard.putNumber("Joystick/xSpeedRaw", xSpeed);
+    SmartDashboard.putNumber("Joystick/ySpeedRaw", ySpeed);
+    SmartDashboard.putNumber("Joystick/turningSpeedRaw", turningSpeed);
 
     //apply deadband
     xSpeed = Math.abs(xSpeed) > OIConstants.kDeadband ? xSpeed : 0.0;
     ySpeed = Math.abs(ySpeed) > OIConstants.kDeadband ? ySpeed : 0.0;
     turningSpeed = Math.abs(turningSpeed) > OIConstants.kDeadband ? turningSpeed : 0.0;
 
-    xSpeed *= DriveConstants.kMaxTranslationalMetersPerSecond;
-    ySpeed *= DriveConstants.kMaxTranslationalMetersPerSecond;
+    //use SlewRateLimiter with DriveConstants
+    xSpeed = xSlewRateLimiter.calculate(xSpeed) * DriveConstants.kMaxTranslationalMetersPerSecond;
+    ySpeed = ySlewRateLimiter.calculate(ySpeed) * DriveConstants.kMaxTranslationalMetersPerSecond;
     turningSpeed = turningSlewRateLimiter.calculate(turningSpeed) * DriveConstants.kMaxTurningRadiansPerSecond;
-    SmartDashboard.putNumber("Swerve/turningSpeedCommanded", turningSpeed);
+    SmartDashboard.putNumber("Joystick/xSpeedCommanded", xSpeed);
+    SmartDashboard.putNumber("Joystick/ySpeedCommanded", ySpeed);
+    SmartDashboard.putNumber("Joystick/turningSpeedCommanded", turningSpeed);
 
-    DriveConstants.kDriveKinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed,ySpeed,turningSpeed, null));
+    swerveDrive.setModuleSstates(DriveConstants.kDriveKinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed,ySpeed,turningSpeed, swerveDrive.getMeasuredAngle())));
   }
 
   // Called once the command ends or is interrupted.
