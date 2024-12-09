@@ -6,8 +6,11 @@ package frc.robot.commands;
 
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -62,7 +65,10 @@ public class SwerveJoystick extends Command {
     SmartDashboard.putNumber("Joystick/ySpeedCommanded", ySpeed);
     SmartDashboard.putNumber("Joystick/turningSpeedCommanded", turningSpeed);
 
-    swerveDrive.setModuleSstates(DriveConstants.kDriveKinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed,ySpeed,turningSpeed, swerveDrive.getMeasuredAngle())));
+    SwerveModuleState [] desiredSwerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed,ySpeed,turningSpeed, swerveDrive.getMeasuredAngle()));
+    Logger.recordOutput(getName(), desiredSwerveModuleStates);
+    swerveDrive.setModuleSstates(desiredSwerveModuleStates);
+    
   }
 
   // Called once the command ends or is interrupted.
