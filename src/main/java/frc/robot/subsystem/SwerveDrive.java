@@ -4,32 +4,61 @@
 
 package frc.robot.subsystem;
 
+import com.kauailabs.navx.frc.AHRS;
+
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.DriveConstants;
 
 public class SwerveDrive extends SubsystemBase {
+  private final SwerveModule frontLeft = new SwerveModule();
+  private final SwerveModule frontRight = new SwerveModule();
+  private final SwerveModule backLeft = new SwerveModule();
+  private final SwerveModule backRight = new SwerveModule();
+
+  private final AHRS imu = new AHRS();
+  private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,this.getMeasuredAngle(),new SwerveModulePosition[] {
+    frontLeft.getPosition(),
+    frontRight.getPosition(),
+    backLeft.getPosition(),
+    backRight.getPosition()
+  });
+
   /** Creates a new SwerveDrive. */
   public SwerveDrive() {
+    new Thread(() -> {
+      try {
+        Thread.sleep(1000);
+        resetHeading();
+      } catch (Exception e) {
+        // System.out.println("ERROR in sleep thread: " + e);
+      }
+     }).start();
   }
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    odometer.update(getMeasuredAngle(), 
+      new SwerveModulePosition[] {frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
   }
 
-  public void setModuleStates(SwerveModuleState[] states) {
-
+  public void setModuleStates(SwerveModuleState[] desiredModuleStates) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(desiredModuleStates, DriveConstants.kMaxTranslationalMetersPerSecond);
+    frontLeft.setDesiredState(desiredModuleStates[0]);
+    frontRight.setDesiredState(desiredModuleStates[1]);
+    backLeft.setDesiredState(desiredModuleStates[2]);
+    backRight.setDesiredState(desiredModuleStates[3]);
   }
 
   public Rotation2d getMeasuredAngle() {
-      // TODO Auto-generated method stub
-      return new Rotation2d(0.0);
+      return imu.getRotation2d();
   }
 
-  public void setModuleSstates(SwerveModuleState [] desiredModuleStates) {
-      // TODO Auto-generated method stub
-
+  public void resetHeading() {
+    imu.reset();
   }
-
 }
