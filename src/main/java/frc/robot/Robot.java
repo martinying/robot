@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -13,6 +14,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -61,6 +63,9 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    double cpuLoad = ManagementFactory.getPlatformMXBean(
+    com.sun.management.OperatingSystemMXBean.class).getCpuLoad();
+    SmartDashboard.putNumber("Robot/CPU", cpuLoad);
   }
 
   @Override
