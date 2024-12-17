@@ -4,6 +4,8 @@
 
 package frc.robot.subsystem;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -49,12 +51,17 @@ public class SwerveDrive extends SubsystemBase {
   );
 
   private final AHRS imu = new AHRS();
-  private final SwerveDriveOdometry odometer = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,this.getMeasuredAngle(),new SwerveModulePosition[] {
+  private final SwerveDriveOdometry odometery = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,this.getMeasuredAngle(),new SwerveModulePosition[] {
     frontLeft.getPosition(),
     frontRight.getPosition(),
     backLeft.getPosition(),
     backRight.getPosition()
   });
+
+  SwerveModuleIOInputsAutoLogged frontLeftInputs = new SwerveModuleIOInputsAutoLogged();
+  SwerveModuleIOInputsAutoLogged frontRightInputs = new SwerveModuleIOInputsAutoLogged();
+  SwerveModuleIOInputsAutoLogged backLeftInputs = new SwerveModuleIOInputsAutoLogged();
+  SwerveModuleIOInputsAutoLogged backRightInputs = new SwerveModuleIOInputsAutoLogged();
 
   /** Creates a new SwerveDrive. */
   public SwerveDrive() {
@@ -70,7 +77,16 @@ public class SwerveDrive extends SubsystemBase {
 
   @Override
   public void periodic() {
-    odometer.update(getMeasuredAngle(), 
+    frontLeft.updateInputs(frontLeftInputs);
+    Logger.processInputs("SwerveDrive/FrontLeftModule", frontLeftInputs);
+    frontRight.updateInputs(frontRightInputs);
+    Logger.processInputs("SwerveDrive/FrontRightModule", frontRightInputs);
+    backLeft.updateInputs(backLeftInputs);
+    Logger.processInputs("SwerveDrive/BackLeftModule", backLeftInputs);
+    backRight.updateInputs(backRightInputs);
+    Logger.processInputs("SwerveDrive/BackRightModule", backRightInputs);
+    
+    odometery.update(getMeasuredAngle(), 
       new SwerveModulePosition[] {frontLeft.getPosition(), frontRight.getPosition(), backLeft.getPosition(), backRight.getPosition()});
   }
 

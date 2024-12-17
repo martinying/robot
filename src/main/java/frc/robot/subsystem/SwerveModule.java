@@ -21,8 +21,15 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import frc.robot.constants.DriveConstants;
 
+import org.littletonrobotics.junction.AutoLog;
+
 /** Add your docs here. */
 public class SwerveModule {
+
+    @AutoLog
+    public static class SwerveModuleIOInputs {
+        public Rotation2d turnPosition = new Rotation2d();
+    }
 
     private final TalonFX driveMotorController;
     private final CANSparkMax turnMotorController;
@@ -71,5 +78,9 @@ public class SwerveModule {
 
     private Rotation2d getAbsoluteEncoderCurrentAngle() {
         return new Rotation2d(absoluteEncoder.getDistance() - absoluteEncoderOffset);
+    }
+
+    public void updateInputs(SwerveModuleIOInputs inputs) {
+        inputs.turnPosition = getAbsoluteEncoderCurrentAngle();
     }
 }
